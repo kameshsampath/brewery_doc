@@ -1,0 +1,171 @@
+= Spring Cloud Samples: Brewery on OpenShift: Quick Setup Guide
+:author: Kamesh Sampath
+:revnumber: {version}
+:revdate: {localdate}
+:toc: macro
+:linkattrs:
+:toc-title: Spring Cloud Samples: Brewery on OpenShift
+:doctype: book
+:icons: font
+:toclevels: 4
+
+== Overview
+This guides walks you through how to quickly setup  https://github.com/kameshsampath/brewery[Spring Cloud Samples - Brewery] on
+https://www.openshift.com[OpenShift].  The steps in this guide could be a the first step or a Proof of Technology(PoT) on how to migrate the existing Spring Cloud/Boot applications
+on to https://kubernetes.io[Kubernetes] (OR) https://www.openshift.com[Openshift].
+
+== Pre-Requsite
+
+You have a OpenShift cluster running locally using https://docs.openshift.org/latest/minishift/getting-started/index.html[*minishift*]
+or https://developers.redhat.com/products/cdk/overview/Op[*CDK*], or
+have access to https://www.openshift.com/container-platform/index.html[*OpenShift Container Platform*]
+
+[NOTE]
+====
+Not sure this needed, but have this setup as pre-req for next iteration
+
+`oc policy add-role-to-user view system:serviceaccount:$(oc project -q):default -n $(oc project -q)`
+====
+
+[[application-setup]]
+== Setup
+
+[[clone-source]]
+=== Clone
+
+[source,sh]
+----
+git clone https://github.com/kameshsampath/brewery
+----
+
+Through out this document we will call the directoy where the project is cloned as _$PROJECT_HOME_
+
+[[build-app]]
+=== Building
+
+Brewery applicaiton uses gradle for build, we will leverage on the same to get the application artifacts ready. To build the applicaiton
+run the following command
+
+[source,sh]
+----
+./gradlew -DWHAT_TO_TEST="SLEUTH_STREAM" clean build <1>
+----
+
+<1> We will be using https://cloud.spring.io/spring-cloud-sleuth/[Spring Cloud Sleuth] for sending trace information to https://github.com/openzipkin/zipkin[Zipkin]
+
+[[deploy-to-openshift]]
+=== Deploying to OpenShift
+
+As part of this lift and shift of existing application, to make it work as-is, there is certain order of applicaiton deployment might be required.  The following section
+explains the deployment of the application in the same order as expected  ( you can expriment with it if you like :) )
+
+[[deploy-rabbitmq]]
+==== RabbitMQ
+
+Go to the directory  *$PROJECT_HOME/extras/rabbitmq*, and execute the following command
+
+[source,sh]
+----
+./mvnw -Dfabric8.mode=kubernetes clean fabric8:deploy
+----
+
+This will take some time to get it running as the deployment needs to download the `rabbitmq` docker image
+
+[[deploy-config-server]]
+==== Config Server
+
+Go to the directory  *$PROJECT_HOME/config-server*, and execute the following command
+
+[source,sh]
+----
+./mvnw clean fabric8:deploy
+----
+
+NOTE: Since this is the first Java application to be deployed,  it may take some time to download the necessary images from docker hub.
+
+[[deploy-eureka]]
+==== Eureka
+
+Go to the directory  *$PROJECT_HOME/eureka*, and execute the following command
+
+[source,sh]
+----
+./mvnw clean fabric8:deploy
+----
+
+[[zipkin-server]]
+==== Zipkin Server
+
+Go to the directory  *$PROJECT_HOME/zipkin-server*, and execute the following command
+
+[source,sh]
+----
+./mvnw clean fabric8:deploy
+----
+
+[[zuul]]
+==== Zuul
+
+Go to the directory  *$PROJECT_HOME/zuul*, and execute the following command
+
+[source,sh]
+----
+./mvnw clean fabric8:deploy
+----
+
+[[ingredients]]
+==== Ingredients
+
+Go to the directory  *$PROJECT_HOME/ingredients*, and execute the following command
+
+[source,sh]
+----
+./mvnw clean fabric8:deploy
+----
+
+[[reporting]]
+==== Reporting
+
+Go to the directory  *$PROJECT_HOME/reporting*, and execute the following command
+
+[source,sh]
+----
+./mvnw clean fabric8:deploy
+----
+
+[[brewing]]
+==== Brewing
+
+Go to the directory  *$PROJECT_HOME/brewing*, and execute the following command
+
+[source,sh]
+----
+./mvnw clean fabric8:deploy
+----
+
+[[presenting]]
+==== Presenting
+
+Go to the directory  *$PROJECT_HOME/presenting*, and execute the following command
+
+[source,sh]
+----
+./mvnw clean fabric8:deploy
+----
+
+=== Accessing the Application
+
+You can view the application urls from OpenShift Web Console.  A successful deployment  will have all the applications running with single pod. The following screenshots
+shows how the <<deploy-eureka,Eureka>> will look like when all the clients registers with it
+
+.Brewery Services
+image::./OpenShift_Web_Console.png[OpenShift WebConsole]
+
+.Eureka on OpenShift
+image::./Eureka_OpenShift.png[Netflix Eureka Registry]
+
+.Brewer App
+image::./Brewer_App.png[Brewer Application Home]
+
+
+--END--
