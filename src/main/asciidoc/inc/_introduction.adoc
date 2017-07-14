@@ -1,0 +1,56 @@
+= Spring Cloud Samples: Brewery on OpenShift
+
+== Overview
+
+This guides walks you through to setup  https://github.com/kameshsampath/brewery[Spring Cloud Samples - Brewery] on
+https://www.openshift.com[OpenShift].  The steps in this guide could be a the first step or a Proof of Technology(PoT)
+on how to migrate the existing Spring Cloud/Boot applications on to https://kubernetes.io[Kubernetes]
+or https://www.openshift.com[Openshift].
+
+In the process of migration, the original https://github.com/spring-cloud-samples/brewery[Spring Cloud Samples - Brewery]
+will be modified to make it deployable on to https://kubernetes.io[Kubernetes] or https://www.openshift.com[Openshift].
+
+The application will be migrated with iterations,
+
+* [*] <<iteration-1>> - As-is deployment of the https://github.com/spring-cloud-samples/brewery[Spring Cloud Samples - Brewery]
+with minimal or no code change
+
+* [*] <<iteration-2>> - Will strip deployment of few Netflix OSS components that is considered as superfluous inside Kubernetes
+
+* [] Iteration III - Optimization
+
+* [] Iteration IV - Serviec Mesh
+
+== Pre-Requsite
+
+You have a OpenShift cluster running locally using https://docs.openshift.org/latest/minishift/getting-started/index.html[*minishift*]
+or https://developers.redhat.com/products/cdk/overview/Op[*CDK*], or
+have access to https://www.openshift.com/container-platform/index.html[*OpenShift Container Platform*]
+
+[NOTE]
+====
+
+This is needed only in OpenShift and applicable for iteations 2 and above
+
+`oc policy add-role-to-user view system:serviceaccount:$(oc project -q):default -n $(oc project -q)`
+====
+
+== Accessing the Applications
+
+You can view the application urls from OpenShift Web Console.  A successful deployment  will have all the applications running with single pod. The following screenshots
+shows how the <<deploy-eureka,Eureka>> will look like when all the clients registers with it
+
+.Brewery Services
+image::./OpenShift_Web_Console.png[OpenShift WebConsole]
+
+.Eureka on OpenShift
+image::./Eureka_OpenShift.png[Netflix Eureka Registry]
+
+.Brewer App
+image::./Brewer_App.png[Brewer Application Home]
+
+== References
+
+* http://books.sonatype.com/mvnref-book/reference/resource-filtering-sect-properties.html[Maven Properties]
+* https://kubernetes.io[Kubernetes]
+* https://www.openshift.com[Openshift]
